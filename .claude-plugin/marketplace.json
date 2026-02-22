@@ -1,0 +1,18 @@
+{
+  "name": "YYong91-gru",
+  "description": "Gru + Minion session orchestration skills for Claude Code",
+  "owner": {
+    "name": "YYong91"
+  },
+  "plugins": [
+    {
+      "name": "gru",
+      "description": "Multi-session task orchestration: Gru manages, Minions execute",
+      "version": "0.1.0",
+      "source": "./",
+      "author": {
+        "name": "YYong91"
+      }
+    }
+  ]
+}
