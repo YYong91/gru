@@ -19,23 +19,26 @@ If empty: "백로그가 비어있습니다. `/gru:plan` 으로 작업을 추가�
 Display unchecked items numbered. Ask user which to assign (can pick multiple).
 Use AskUserQuestion with the list.
 
-### Step 3: For each selected task
+### Step 3: Determine project_path for each selected task
 
-Append to `~/.claude/org/active.md`:
+- If project is a specific app (e.g. `podo-budget`): use `~/Developer/{project}`
+- If project is `전체공통` or spans multiple projects: ask "어느 디렉토리에서 작업할 예정인가요? (예: ~/Developer/podo-budget)"
+
+### Step 4: For each selected task, append to `~/.claude/org/active.md`
 
 ```
 ### [{project}] {description}
 - assigned: {YYYY-MM-DD HH:MM}
-- project_path: ~/Developer/{project}
+- project_path: {project_path}
 - priority: {priority}
-- status: in_progress
+- status: assigned
 ```
 
-### Step 4: Mark as assigned in backlog
+### Step 5: Mark as assigned in backlog
 
 In `backlog.md`, change `- [ ]` to `- [x]` for assigned items.
 
-### Step 5: Confirm
+### Step 6: Confirm
 
 Show assigned tasks and say:
-"✅ {N}개 작업이 배정되었습니다. 해당 프로젝트 세션을 열면 자동으로 컨텍스트가 주입됩니다."
+"✅ {N}개 작업이 배정되었습니다. 해당 디렉토리에서 `claude --dangerously-skip-permissions` 로 세션을 열고 `/minion:start` 를 실행하세요."
