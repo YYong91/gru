@@ -43,13 +43,42 @@ git push origin HEAD
 
 실패하면 에러를 보고서에 기록하고 계속 진행한다 (push 실패해도 보고서는 작성).
 
-### Step 4: Summarize work done
+### Step 4: Monitor GitHub Actions and fix failures
+
+Push 후 GitHub Actions 워크플로우가 성공할 때까지 모니터링하고, 실패 시 수정 후 재시도한다.
+
+**모니터링:**
+```bash
+# 최신 워크플로우 실행 상태 확인 (30초 간격으로 폴링)
+gh run list --limit 1
+gh run watch  # 완료될 때까지 대기
+```
+
+또는 완료 대기:
+```bash
+gh run list --limit 1 --json databaseId --jq '.[0].databaseId' | xargs gh run watch
+```
+
+**결과별 처리:**
+
+- **success**: 계속 진행 (Step 5로)
+- **failure**: 실패 원인 파악 후 수정
+  ```bash
+  # 실패한 Job의 로그 확인
+  gh run view --log-failed
+  ```
+  원인에 따라 코드 수정 → 커밋 → push → 다시 Actions 모니터링 반복
+  (무한 루프 방지: 최대 3회 수정 시도. 3회 후에도 실패 시 보고서에 기록하고 계속 진행)
+
+**GitHub Actions가 없는 프로젝트**: 이 단계를 건너뛴다.
+
+### Step 5: Summarize work done
 
 Based on conversation history, generate a concise summary autonomously. Do NOT ask the user.
-테스트 결과(몇 개 통과, 새로 작성한 테스트 수)도 요약에 포함한다.
+테스트 결과(몇 개 통과, 새로 작성한 테스트 수) + GitHub Actions 결과도 요약에 포함한다.
 `리뷰 필요` is always `yes` — Gru will decide on merge/deploy.
 
-### Step 5: Write report
+### Step 6: Write report
 
 Create `~/.claude/org/reports/{YYYY-MM-DD}-{project}-{task-slug}.md`:
 
@@ -61,17 +90,18 @@ Create `~/.claude/org/reports/{YYYY-MM-DD}-{project}-{task-slug}.md`:
 **완료일시:** {YYYY-MM-DD HH:MM}
 **결과:** {summary}
 **테스트:** backend {N}개 통과 / frontend {N}개 통과 (신규 {N}개 추가)
+**CI/CD:** GitHub Actions {success/failure} ({run_url})
 **PR:** {pr_link or "없음"}
 **남은 것:** {remaining or "없음"}
 **리뷰 필요:** yes
 ```
 
-### Step 6: Remove from active.md
+### Step 7: Remove from active.md
 
 Read active.md. Remove the matching `### [project] task` section.
 Write back.
 
-### Step 7: Send Telegram notification
+### Step 8: Send Telegram notification
 
 Load credentials from `~/.claude/org/.env` (source the file or read TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID).
 
@@ -81,13 +111,14 @@ source ~/.claude/org/.env
 MESSAGE="✅ 미니언 완료: [{project}] {task_description}
 결과: {one-line summary}
 테스트: {test_summary}
+CI/CD: {actions_result}
 리뷰 필요: yes — /gru:review 로 확인하세요"
 curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
   -d chat_id="${TELEGRAM_CHAT_ID}" \
   --data-urlencode "text=${MESSAGE}"
 ```
 
-### Step 8: Confirm
+### Step 9: Confirm
 
 Show: "✅ 보고서 저장됨: reports/{filename}"
 Show: "Gru에게 알림 전송됨. `/gru:review` 로 확인 가능합니다."
