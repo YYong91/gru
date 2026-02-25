@@ -12,7 +12,8 @@ description: Use when Gru wants to review completed session reports and decide o
 ### Step 1: Find pending reviews
 
 List `~/.claude/org/reports/`. Read each file.
-Filter to only those containing `리뷰 필요: yes`.
+Filter to only those where the `리뷰 필요` field value is `yes`.
+The line may appear as `리뷰 필요: yes` or `**리뷰 필요:** yes` (markdown bold variant) — match both.
 Sort by filename (date) descending.
 
 If none: "검토할 보고서가 없습니다."
@@ -33,6 +34,6 @@ Ask: "어떻게 하시겠습니까?" with options:
 
 ### Step 3: Update report based on decision
 
-If approved: change `리뷰 필요: yes` → `리뷰 필요: no` in report file.
+If approved: change the `yes` → `no` for the `리뷰 필요` field (preserve the original format, whether bold or plain).
 If rework: append `## Gru 피드백\n{memo}` to report. Keep `리뷰 필요: yes`.
 If later: skip.

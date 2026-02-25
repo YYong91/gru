@@ -11,12 +11,19 @@ description: Use when a Minion session is ready to begin its assigned task. Clai
 
 ### Step 1: Find assigned task
 
-Read `~/.claude/org/active.md`. Find task where:
-- `project_path` matches current working directory
-- `status: assigned`
+The command may be invoked as `/minion:start` or `/minion:start {N}` where N is a session number.
 
-If none found: "배정된 작업이 없습니다. `/gru:assign` 으로 작업을 배정받으세요."
-If `status: in_progress` task found: "이미 진행 중인 작업이 있습니다: {task}. `/minion:done` 으로 완료 처리 후 새 작업을 시작하세요."
+Read `~/.claude/org/active.md` and find the task to claim:
+
+**If session number N is provided** (`/minion:start 1`, `/minion:start 2`, etc.):
+- Find the task with `session: {N}` in active.md
+- If not found: "세션 {N}에 배정된 작업이 없습니다."
+- If found but `status: in_progress`: "세션 {N}은 이미 진행 중입니다. `/minion:done` 으로 완료 처리 후 재시작하세요."
+
+**If no session number provided** (backward compatibility):
+- Find task where `project_path` matches current working directory AND `status: assigned`
+- If none found: "배정된 작업이 없습니다. `/gru:assign` 으로 작업을 배정받으세요."
+- If `status: in_progress` task found: "이미 진행 중인 작업이 있습니다. `/minion:done` 으로 완료 처리 후 새 작업을 시작하세요."
 
 ### Step 2: Claim the task
 
